@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --bg:#020810;
+    --surface:#070f1c;
+    --surface2:#0d1a2e;
+    --accent:#00d4ff;
+    --accent2:#0066ff;
+    --accent3:#00ff88;
+    --text:#e8f4ff;
+    --muted:#6b8aaa;
+    --border:rgba(0,212,255,0.12);
+    --border2:rgba(0,212,255,0.25);
+  }
+  body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden}
+  
+  .noise{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+  
+  .grid-bg{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;background-image:linear-gradient(rgba(0,212,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,0.03) 1px,transparent 1px);background-size:48px 48px}
+  
+  .glow-orb{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0}
+  .orb1{top:-20%;left:-10%;width:600px;height:600px;background:rgba(0,102,255,0.08)}
+  .orb2{bottom:-20%;right:-10%;width:500px;height:500px;background:rgba(0,212,255,0.06)}
+  .orb3{top:40%;left:40%;width:300px;height:300px;background:rgba(0,255,136,0.04)}
+  
+  .wrap{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:32px 24px}
+  
+  nav{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border:1px solid var(--border);border-radius:16px;background:rgba(7,15,28,0.8);backdrop-filter:blur(20px);margin-bottom:48px}
+  .logo{font-family:'Space Mono',monospace;font-size:14px;color:var(--accent);letter-spacing:2px}
+  .logo span{color:var(--muted)}
+  .nav-links{display:flex;gap:8px}
+  .nav-links a{font-size:13px;color:var(--muted);text-decoration:none;padding:8px 16px;border-radius:8px;border:1px solid transparent;transition:all .2s;font-family:'Space Mono',monospace;letter-spacing:0.5px}
+  .nav-links a:hover{color:var(--accent);border-color:var(--border2);background:rgba(0,212,255,0.05)}
+  
+  .hero{display:grid;grid-template-columns:1.1fr 0.9fr;gap:24px;margin-bottom:24px;align-items:stretch}
+  .hero-main{border:1px solid var(--border);border-radius:24px;background:var(--surface);padding:48px;position:relative;overflow:hidden}
+  .hero-main::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent)}
+  
+  .status-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);border-radius:100px;padding:6px 14px;font-size:12px;color:var(--accent3);font-family:'Space Mono',monospace;margin-bottom:28px}
+  .status-dot{width:6px;height:6px;border-radius:50%;background:var(--accent3);animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.8)}}
+  
+  .hero-name{font-size:52px;font-weight:800;line-height:1.05;letter-spacing:-1px;margin-bottom:12px}
+  .hero-name .line1{color:var(--text)}
+  .hero-name .line2{background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  
+  .hero-title{font-size:15px;color:var(--muted);font-family:'Space Mono',monospace;letter-spacing:1px;margin-bottom:24px}
+  
+  .hero-desc{font-size:15px;line-height:1.8;color:rgba(232,244,255,0.65);max-width:480px;margin-bottom:36px}
+  
+  .cta-row{display:flex;gap:12px;flex-wrap:wrap}
+  .btn-primary{display:inline-block;background:var(--accent);color:#020810;font-weight:700;font-size:13px;padding:12px 24px;border-radius:10px;text-decoration:none;font-family:'Space Mono',monospace;letter-spacing:0.5px;transition:all .2s}
+  .btn-primary:hover{background:#fff;transform:translateY(-1px)}
+  .btn-ghost{display:inline-block;border:1px solid var(--border2);color:var(--text);font-size:13px;padding:12px 24px;border-radius:10px;text-decoration:none;font-family:'Space Mono',monospace;letter-spacing:0.5px;transition:all .2s}
+  .btn-ghost:hover{background:rgba(0,212,255,0.06);border-color:var(--accent)}
+  
+  .hero-right{display:flex;flex-direction:column;gap:20px}
+  
+  .focus-card{border:1px solid var(--border);border-radius:24px;background:var(--surface);padding:28px;flex:1}
+  .card-label{font-size:11px;font-family:'Space Mono',monospace;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:16px}
+  .focus-items{display:flex;flex-direction:column;gap:10px}
+  .focus-item{display:flex;align-items:center;gap:12px;background:rgba(0,212,255,0.04);border:1px solid var(--border);border-radius:10px;padding:12px 16px;font-size:14px;transition:all .2s;cursor:default}
+  .focus-item:hover{border-color:var(--border2);background:rgba(0,212,255,0.08)}
+  .focus-icon{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0}
+  
+  .links-card{border:1px solid var(--border);border-radius:24px;background:var(--surface);padding:28px}
+  .links-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+  .profile-link{display:flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:10px;padding:12px;font-size:13px;font-family:'Space Mono',monospace;color:var(--muted);text-decoration:none;transition:all .2s;gap:6px}
+  .profile-link:hover{color:var(--accent);border-color:var(--border2);background:rgba(0,212,255,0.05)}
+  .ext{font-size:10px;opacity:0.5}
+  
+  .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+  .stat-card{border:1px solid var(--border);border-radius:16px;background:var(--surface);padding:24px;text-align:center;position:relative;overflow:hidden}
+  .stat-card::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent)}
+  .stat-num{font-size:36px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;display:block}
+  .stat-label{font-size:12px;color:var(--muted);font-family:'Space Mono',monospace;letter-spacing:1px;margin-top:4px}
+  
+  .section{margin-bottom:24px}
+  .section-header{display:flex;align-items:center;gap:16px;margin-bottom:20px}
+  .section-title{font-size:26px;font-weight:800;letter-spacing:-0.5px}
+  .section-line{flex:1;height:1px;background:var(--border)}
+  .section-tag{font-size:11px;font-family:'Space Mono',monospace;color:var(--accent);letter-spacing:2px;background:rgba(0,212,255,0.08);border:1px solid var(--border2);padding:4px 12px;border-radius:100px}
+  
+  .services-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+  .service-card{border:1px solid var(--border);border-radius:20px;background:var(--surface);padding:28px;transition:all .25s;position:relative;overflow:hidden}
+  .service-card:hover{border-color:var(--border2);transform:translateY(-2px);background:rgba(13,26,46,0.8)}
+  .service-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:linear-gradient(180deg,var(--accent),var(--accent2))}
+  .service-num{font-size:11px;font-family:'Space Mono',monospace;color:var(--accent);letter-spacing:2px;margin-bottom:12px}
+  .service-title{font-size:17px;font-weight:700;margin-bottom:10px}
+  .service-desc{font-size:14px;line-height:1.7;color:rgba(232,244,255,0.55)}
+  
+  .skills-wrap{display:flex;flex-wrap:wrap;gap:10px}
+  .skill-tag{background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.15);border-radius:8px;padding:8px 16px;font-size:13px;font-family:'Space Mono',monospace;color:var(--accent);letter-spacing:0.5px;transition:all .2s;cursor:default}
+  .skill-tag:hover{background:rgba(0,212,255,0.12);border-color:var(--accent);transform:translateY(-1px)}
+  
+  .exp-list{display:flex;flex-direction:column;gap:16px}
+  .exp-card{border:1px solid var(--border);border-radius:20px;background:var(--surface);padding:28px;position:relative;overflow:hidden;transition:border-color .2s}
+  .exp-card:hover{border-color:var(--border2)}
+  .exp-card::after{content:'';position:absolute;top:0;right:0;width:200px;height:200px;background:radial-gradient(circle,rgba(0,212,255,0.04),transparent);pointer-events:none}
+  .exp-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px;flex-wrap:wrap}
+  .exp-role{font-size:18px;font-weight:700;margin-bottom:4px}
+  .exp-company{font-size:13px;color:var(--accent);font-family:'Space Mono',monospace}
+  .exp-period{background:rgba(0,212,255,0.08);border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-size:12px;font-family:'Space Mono',monospace;color:var(--muted);white-space:nowrap}
+  .exp-points{list-style:none;display:flex;flex-direction:column;gap:8px}
+  .exp-points li{font-size:14px;line-height:1.7;color:rgba(232,244,255,0.6);display:flex;align-items:flex-start;gap:10px}
+  .exp-points li::before{content:'→';color:var(--accent);font-family:'Space Mono',monospace;font-size:12px;margin-top:2px;flex-shrink:0}
+  
+  .contact-card{border:1px solid var(--border);border-radius:24px;background:var(--surface);padding:40px;position:relative;overflow:hidden}
+  .contact-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent)}
+  .contact-card::after{content:'';position:absolute;bottom:-100px;right:-100px;width:300px;height:300px;background:radial-gradient(circle,rgba(0,102,255,0.06),transparent);pointer-events:none}
+  .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:28px}
+  .contact-item{margin-bottom:24px}
+  .contact-label{font-size:11px;font-family:'Space Mono',monospace;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+  .contact-value{font-size:16px;color:var(--accent);text-decoration:none;font-family:'Space Mono',monospace;transition:color .2s}
+  .contact-value:hover{color:#fff}
+  .connect-links{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+  .connect-btn{border:1px solid var(--border);border-radius:10px;padding:10px 20px;font-size:13px;font-family:'Space Mono',monospace;color:var(--muted);text-decoration:none;transition:all .2s}
+  .connect-btn:hover{color:var(--accent);border-color:var(--border2);background:rgba(0,212,255,0.05)}
+  
+  footer{text-align:center;padding:32px 0 0;font-size:12px;font-family:'Space Mono',monospace;color:var(--muted);letter-spacing:1px}
+  
+  @keyframes fadeInUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  .wrap > *{animation:fadeInUp .5s ease both}
+  nav{animation-delay:.05s}
+  .hero{animation-delay:.1s}
+  .stats-row{animation-delay:.15s}
+  .section{animation-delay:.2s}
+
+  @media(max-width:700px){
+    .hero{grid-template-columns:1fr}
+    .hero-name{font-size:36px}
+    .services-grid{grid-template-columns:1fr}
+    .stats-row{grid-template-columns:1fr}
+    .contact-grid{grid-template-columns:1fr}
+    .nav-links{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="noise"></div>
+<div class="grid-bg"></div>
+<div class="glow-orb orb1"></div>
+<div class="glow-orb orb2"></div>
+<div class="glow-orb orb3"></div>
+
+<div class="wrap">
+  <nav>
+    <div class="logo">IAM<span>_</span>USMAN</div>
+    <div class="nav-links">
+      <a href="#about">About</a>
+      <a href="#services">Services</a>
+      <a href="#experience">Experience</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-main">
+      <div class="status-badge">
+        <div class="status-dot"></div>
+        Available for Projects
+      </div>
+      <div class="hero-name">
+        <div class="line1">Usman</div>
+        <div class="line2">Haider</div>
+      </div>
+      <div class="hero-title">// Identity & Security Engineer</div>
+      <p class="hero-desc">Building secure identity environments using Okta, Microsoft Entra ID, Active Directory, and endpoint security — with real MSSP experience supporting US-based clients.</p>
+      <div class="cta-row">
+        <a href="#contact" class="btn-primary">Work With Me</a>
+        <a href="mailto:admin@iamwithusman.com" class="btn-ghost">admin@iamwithusman.com</a>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="focus-card">
+        <div class="card-label">Core Focus</div>
+        <div class="focus-items">
+          <div class="focus-item"><div class="focus-icon"></div>Okta & IAM</div>
+          <div class="focus-item"><div class="focus-icon"></div>Microsoft Entra ID</div>
+          <div class="focus-item"><div class="focus-icon"></div>Active Directory</div>
+          <div class="focus-item"><div class="focus-icon"></div>M365 & Intune</div>
+        </div>
+      </div>
+      <div class="links-card">
+        <div class="card-label">Profiles</div>
+        <div class="links-grid">
+          <a href="https://www.linkedin.com/in/usman-haider-30a54a157/" target="_blank" class="profile-link">LinkedIn <span class="ext">↗</span></a>
+          <a href="https://github.com/Usmanhaid" target="_blank" class="profile-link">GitHub <span class="ext">↗</span></a>
+          <a href="https://www.fiverr.com/usmanbutt578?public_mode=true" target="_blank" class="profile-link">Fiverr <span class="ext">↗</span></a>
+          <a href="https://www.upwork.com/freelancers/~014f79206f2c05a6f4?viewMode=1" target="_blank" class="profile-link">Upwork <span class="ext">↗</span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <span class="stat-num">7+</span>
+      <div class="stat-label">Years Experience</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-num">US</span>
+      <div class="stat-label">Client Exposure</div>
+    </div>
+    <div class="stat-card">
+      <span class="stat-num">MSSP</span>
+      <div class="stat-label">Background</div>
+    </div>
+  </div>
+
+  <div id="about" class="section">
+    <div class="section-header">
+      <div class="section-title">About Me</div>
+      <div class="section-line"></div>
+      <div class="section-tag">WHO I AM</div>
+    </div>
+    <div style="border:1px solid var(--border);border-radius:20px;background:var(--surface);padding:32px">
+      <p style="font-size:15px;line-height:1.9;color:rgba(232,244,255,0.65);margin-bottom:16px">I am an Identity & Security professional with hands-on experience in Managed Service Provider environments, supporting US-based clients across identity, authentication, endpoint security, and hybrid infrastructure. My work includes Okta, Microsoft Entra ID, Active Directory, MFA, SSO, Conditional Access, Microsoft 365, Intune, SentinelOne, Cisco Duo, and NinjaOne.</p>
+      <p style="font-size:15px;line-height:1.9;color:rgba(232,244,255,0.45)">Alongside implementation and support, I also provide practical training and consulting for students and professionals who want to build real-world IAM and cloud security skills.</p>
+    </div>
+  </div>
+
+  <div id="services" class="section">
+    <div class="section-header">
+      <div class="section-title">Services</div>
+      <div class="section-line"></div>
+      <div class="section-tag">WHAT I DO</div>
+    </div>
+    <div class="services-grid">
+      <div class="service-card">
+        <div class="service-num">01</div>
+        <div class="service-title">IAM Implementation</div>
+        <p class="service-desc">Secure identity implementations using Okta, Entra ID, and Active Directory with SSO, MFA, and user lifecycle management.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-num">02</div>
+        <div class="service-title">M365 & Endpoint Security</div>
+        <p class="service-desc">Microsoft 365, Intune, endpoint policies, device compliance, and secure access workflows for modern environments.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-num">03</div>
+        <div class="service-title">MSSP Support</div>
+        <p class="service-desc">Hands-on support for US-based client environments with identity troubleshooting, authentication, and security operations.</p>
+      </div>
+      <div class="service-card">
+        <div class="service-num">04</div>
+        <div class="service-title">Training & Consulting</div>
+        <p class="service-desc">Practical training and consulting for Okta, SC-300, Microsoft 365, and real-world IAM use cases.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">Core Technologies</div>
+      <div class="section-line"></div>
+      <div class="section-tag">STACK</div>
+    </div>
+    <div class="skills-wrap">
+      <div class="skill-tag">Okta</div>
+      <div class="skill-tag">Microsoft Entra ID</div>
+      <div class="skill-tag">Active Directory</div>
+      <div class="skill-tag">SSO / SAML / OIDC</div>
+      <div class="skill-tag">MFA</div>
+      <div class="skill-tag">Conditional Access</div>
+      <div class="skill-tag">Microsoft 365</div>
+      <div class="skill-tag">Intune</div>
+      <div class="skill-tag">SentinelOne</div>
+      <div class="skill-tag">Cisco Duo</div>
+      <div class="skill-tag">NinjaOne</div>
+      <div class="skill-tag">VMware</div>
+    </div>
+  </div>
+
+  <div id="experience" class="section">
+    <div class="section-header">
+      <div class="section-title">Experience</div>
+      <div class="section-line"></div>
+      <div class="section-tag">CAREER</div>
+    </div>
+    <div class="exp-list">
+      <div class="exp-card">
+        <div class="exp-top">
+          <div>
+            <div class="exp-role">Identity & Security Administrator</div>
+            <div class="exp-company">USA Remote (MSSP)</div>
+          </div>
+          <div class="exp-period">Aug 2024 – Present</div>
+        </div>
+        <ul class="exp-points">
+          <li>Supporting MSSP client environments focused on identity security and endpoint protection.</li>
+          <li>Administering Okta IAM, AD integration, SSO, and MFA enforcement.</li>
+          <li>Investigating security alerts with SentinelOne and Cisco AMP.</li>
+        </ul>
+      </div>
+      <div class="exp-card">
+        <div class="exp-top">
+          <div>
+            <div class="exp-role">Senior System & Identity Engineer</div>
+            <div class="exp-company">Fero-Tek Pvt Ltd</div>
+          </div>
+          <div class="exp-period">Dec 2021 – Aug 2024</div>
+        </div>
+        <ul class="exp-points">
+          <li>Managed hybrid identity environments with On-Prem AD and Azure AD / Entra ID.</li>
+          <li>Implemented Okta IAM and secure authentication workflows.</li>
+          <li>Supported Microsoft 365, Conditional Access, and basic Intune management.</li>
+        </ul>
+      </div>
+      <div class="exp-card">
+        <div class="exp-top">
+          <div>
+            <div class="exp-role">Freelance IAM Consultant</div>
+            <div class="exp-company">Fiverr & Upwork</div>
+          </div>
+          <div class="exp-period">Ongoing</div>
+        </div>
+        <ul class="exp-points">
+          <li>Delivered IAM consulting and hands-on support for Okta, MFA, and AD integration.</li>
+          <li>Built client trust through practical delivery, fast response, and real-world troubleshooting.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div id="contact" class="section">
+    <div class="section-header">
+      <div class="section-title">Contact</div>
+      <div class="section-line"></div>
+      <div class="section-tag">GET IN TOUCH</div>
+    </div>
+    <div class="contact-card">
+      <div class="contact-grid">
+        <div>
+          <div class="contact-item">
+            <div class="contact-label">Email</div>
+            <a href="mailto:admin@iamwithusman.com" class="contact-value">admin@iamwithusman.com</a>
+          </div>
+          <div class="contact-item">
+            <div class="contact-label">Phone</div>
+            <a href="tel:+923349963445" class="contact-value">+92 334 9963445</a>
+          </div>
+        </div>
+        <div>
+          <div class="contact-label">Let's Connect</div>
+          <div class="connect-links">
+            <a href="https://www.linkedin.com/in/usman-haider-30a54a157/" target="_blank" class="connect-btn">LinkedIn ↗</a>
+            <a href="https://github.com/Usmanhaid" target="_blank" class="connect-btn">GitHub ↗</a>
+            <a href="https://www.fiverr.com/usmanbutt578?public_mode=true" target="_blank" class="connect-btn">Fiverr ↗</a>
+            <a href="https://www.upwork.com/freelancers/~014f79206f2c05a6f4?viewMode=1" target="_blank" class="connect-btn">Upwork ↗</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2025 Usman Haider — Identity & Security Engineer</p>
+  </footer>
+</div>
+</body>
+</html>
